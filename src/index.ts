@@ -23,23 +23,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 import initSQL = require("sql.js")
 import fetch from "cross-fetch"
 import zip from "jszip"
+import Promise from "bluebird"
 
 class _itis {
-    private _data: object
+    private data: object
 
     private load() {
         initSQL().then(sql => {
             fetch("https://itis.gov/downloads/itisSqlite.zip")
                 .then(res => res.arrayBuffer())
-                .then(buffer => {
-                    zip.loadAsync(buffer).then(data => data.folder(/itisSqlite\d+/).file("ITIS.sqlite").async("uint8array"))
-                        .then(function(data) {
-                            const db = new sql.Database(data)
-                            this._data = db.exec("SELECT *")
-                        });
+                .then(buffer => zip.loadAsync(buffer))
+                .then(data => data.folder(/itisSqlite\d+/).file("ITIS.sqlite").async("uint8array"))
+                .then(data => {
+                    const db = new sql.Database(data)
+                    this.data = db.exec("SELECT *")
                 });
         });
     }
@@ -53,7 +54,7 @@ class _itis {
     }
 
     get data() {
-        return this._data
+        return this.data
     }
 }
 
