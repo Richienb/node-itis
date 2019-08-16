@@ -1,0 +1,16 @@
+{
+  "name": "itis",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "https://github.com/Richienb/itis.git",
+  "author": "Richie Bendall <richiebendall@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.5",
+    "cross-fetch": "^3.0.4"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.27",
+    "microbundle": "^0.11.0"
+  }
+}

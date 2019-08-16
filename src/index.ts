@@ -24,38 +24,201 @@
  * SOFTWARE.
  */
 
-import initSQL = require("sql.js")
+/// <reference types="./sourceTypes" />
 import fetch from "cross-fetch"
-import zip from "jszip"
 import Promise from "bluebird"
 
-class _itis {
-    private data: object
-
-    private load() {
-        initSQL().then(sql => {
-            fetch("https://itis.gov/downloads/itisSqlite.zip")
-                .then(res => res.arrayBuffer())
-                .then(buffer => zip.loadAsync(buffer))
-                .then(data => data.folder(/itisSqlite\d+/).file("ITIS.sqlite").async("uint8array"))
-                .then(data => {
-                    const db = new sql.Database(data)
-                    this.data = db.exec("SELECT *")
-                });
-        });
-    }
-
-    constructor() {
-        this.load()
-    }
-
-    public refresh() {
-        this.load()
-    }
-
-    get data() {
-        return this.data
-    }
+const generateSearchParams = (data: object): string => {
+    const params = new URLSearchParams();
+    Object.entries(data).map(val => params.append(val[0], val[1]))
+    return params.toString()
 }
 
-export var itis = new _itis()
+const generateFetch = (endpoint: string, data: object) => fetch(`https://www.itis.gov/ITISWebService/jsonservice/${endpoint}?${generateSearchParams(data)}`).then(res => res.json())
+
+const reduce = (arr, cb) => {
+    if (arr === [null]) return []
+    return arr.reduce((acc, curr) => {
+        acc.push(cb(curr))
+        return acc
+    }, [])
+}
+
+const parseCommonNameList = ({
+    commonNames
+}: CommonNameList) => reduce(commonNames, ({
+    commonName,
+    language
+}) => {
+    name: commonName,
+    language
+})
+
+const parseReferenceFor = (data: ReferenceFor[]) => reduce(data, ({
+    name,
+    refLanguage,
+    tsn
+}) => {
+    name,
+    language: refLanguage,
+    tsn
+})
+
+const notNull = (val: any[]) => val === [null] ? [] : val
+
+export default {
+    search: (key: string) => new Promise((resolve, reject) => {
+        generateFetch("searchForAnyMatch", {
+                srchKey: key
+            })
+            .then(({
+                anyMatchList
+            }) => reduce(anyMatchList, {
+                author,
+                matchType,
+                sciName,
+                commonNameList
+            } => {
+                author,
+                type: matchType.toLowerCase(),
+                name: sciName,
+                commonNames: parseCommonNameList(commonNameList)
+            }))
+            .catch(err => reject(err))
+    }),
+    tsn: (id: number) => new Promise((resolve, reject) => {
+        generateFetch("getFullRecordFromTSN", {
+                tsn: id
+            })
+            .then(({
+                commentList,
+                commonNameList,
+                completenessRating,
+                coreMetadata,
+                dateData,
+                expertList,
+                geographicDivisionList,
+                hierarchyUp,
+                jurisdictionalOriginList,
+                kingdom,
+                otherSourceList,
+                publicationList,
+                scientificName,
+                synonymList,
+                taxRank,
+                taxonAuthor,
+                unacceptReason
+            }: ITISTypeData) => {
+                comments: reduce(commentList.comments, ({
+                    commentDetail,
+                    commentId,
+                    commentTimeStamp,
+                    commentator,
+                    updateDate
+                }) => {
+                    name: commentator,
+                    id: commentId,
+                    lastUpdated: new Date(updateDate),
+                    firstPosted: new Date(commentTimeStamp),
+                    comment: commentDetail
+                }),
+                commonNames: parseCommonNameList(commonNameList),
+                rank: coreMetadata.rankId,
+                completeness: completenessRating.completeness,
+                coverage: coreMetadata.taxonCoverage,
+                currency: coreMetadata.taxonCurrency,
+                validity: {
+                    valid: coreMetadata.taxonUsageRating,
+                    reason: unacceptReason.unacceptReason
+                },
+                firstAdded: new Date(dateData.initialTimeStamp),
+                lastUpdated: new Date(dataData.updateDate),
+                experts: reduce(expertList.experts, ({
+                    expert,
+                    comment,
+                    referenceFor,
+                    updateDate
+                }) => {
+                    expert,
+                    comment,
+                    referenceFor: parseReferenceFor(referenceFor),
+                    lastUpdated: new Date(updateDate)
+                }),
+                geoDivisions: reduce(geographicDivisionList.geoDivisions, ({
+                    geographicValue,
+                    updateDate
+                }) => {
+                    name: geographicValue,
+                    lastUpdated: new Date(updateDate)
+                }),
+                hierarhcyParent: {
+                    name: hierarchyUp.parentName,
+                    tsn: hierarchyUp.tsn,
+                    rank: hierarchyUp.rankName
+                },
+                origins: reduce(jurisdictionalOriginList.jurisdictionalOrigins, ({
+                    jurisdictionValue,
+                    origin,
+                    updateDate
+                }) => {
+                    name: jurisdictionalOriginList,
+                    originType: origin,
+                    lastUpdated: new Date(updateDate)
+                }),
+                kingdom: {
+                    id: +taxRank.kingdomId,
+                    name: taxRank.kingdomName.trim()
+                },
+                rank: {
+                    id: +taxRank.rankId,
+                    name: taxRank.rankName.trim()
+                },
+                otherSources: reduce(otherSourceList.otherSources, ({
+                    acquisitionDate,
+                    referenceFor,
+                    source,
+                    sourceComment,
+                    sourceType,
+                    updateDate,
+                    version
+                }) => {
+                    acquisitionDate: new Date(acquisitionDate),
+                    referenceFor: parseReferenceFor(referenceFor),
+                    source: {
+                        name: source,
+                        comment: sourceComment,
+                        type: sourceType
+                    },
+                    lastUpdated: new Date(updateDate),
+                    version
+                }),
+                publications: reduce(publicationList.publications, ({actualPubDate, isbn, issn, listedPubDate, pages, pubComment, pubName, pubPlace, publisher, referenceAuthor, referenceFor, title, updateDate}) => {
+                    date: {
+                        listed: new Date(listedPubDate),
+                        actual: new Date(actualPubDate)
+                    },
+                    isbn: isbn || undefined,
+                    issn: issn || undefined,
+                    pages,
+                    comment: pubComment,
+                    name: pubName,
+                    location: pubPlace,
+                    publisher,
+                    referenceAuthor,
+                    referenceFor: parseReferenceFor(referenceFor),
+                    title,
+                    lastUpdated: new Date(updateDate)
+                }),
+                name: scientificName.combinedName,
+                synonyms: reduce(synonymList.synonyms, ({sciName, tsn}) => {
+                    name: sciName,
+                    tsn
+                }),
+                author: {
+                    name: taxonAuthor.authorship,
+                    lastUpdated: new Date(taxonAuthor.updateDate)
+                }
+            })
+            .catch(err => reject(err))
+    })
+}
