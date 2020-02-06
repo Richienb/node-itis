@@ -6,15 +6,16 @@
   "author": "Richie Bendall <richiebendall@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "bluebird": "^3.7.2",
-    "cross-fetch": "^3.0.4"
+    "@sindresorhus/is": "^2.0.0",
+    "ky": "^0.17.0",
+    "ky-universal": "^0.4.0",
+    "omit-empty": "^1.0.0",
+    "ow": "^0.15.1",
+    "p-memoize": "^3.1.0"
   },
   "devDependencies": {
-    "@types/bluebird": "^3.5.29",
-    "microbundle": "^0.11.0"
-  },
-  "resolutions": {
-    "microbundle/rollup-plugin-typescript2/rollup-pluginutils/micromatch/braces": "^2.3.1",
-    "microbundle/rollup-plugin-postcss/cssnano/postcss-svgo/svgo/js-yaml": "^3.13.0"
+    "@types/node": "^13.7.0",
+    "@types/omit-empty": "^1.0.0",
+    "typescript": "^3.7.5"
   }
 }
