@@ -6,7 +6,7 @@
   "author": "Richie Bendall <richiebendall@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@sindresorhus/is": "^2.0.0",
+    "@sindresorhus/is": "^2.1.0",
     "ky": "^0.17.0",
     "ky-universal": "^0.4.0",
     "omit-empty": "^1.0.0",
