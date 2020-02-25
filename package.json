@@ -14,7 +14,7 @@
     "p-memoize": "^3.1.0"
   },
   "devDependencies": {
-    "@types/node": "^13.7.4",
+    "@types/node": "^13.7.5",
     "@types/omit-empty": "^1.0.0",
     "typescript": "^3.8.2"
   }
