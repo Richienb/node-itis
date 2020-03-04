@@ -9,9 +9,9 @@
     "@sindresorhus/is": "^2.1.0",
     "ky": "^0.17.0",
     "ky-universal": "^0.4.0",
+    "mem": "^6.0.1",
     "omit-empty": "^1.0.0",
-    "ow": "^0.15.1",
-    "p-memoize": "^3.1.0"
+    "ow": "^0.15.1"
   },
   "devDependencies": {
     "@types/node": "^13.7.6",

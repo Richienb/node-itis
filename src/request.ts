@@ -1,5 +1,5 @@
 import ky from "ky-universal"
-import pMemoize from "p-memoize"
+import mem from "mem"
 import { Options } from "ky"
 
 // API Documentation: https://services.w3.org/xslt?xslfile=https://tomi.vanek.sk/xml/wsdl-viewer.xsl&amp;xmlfile=https://www.itis.gov/ITISWebService/services/ITISService?wsdl
@@ -11,6 +11,6 @@ async function request(endpoint: string, options: Options["searchParams"]): Prom
 	}).json()
 }
 
-export default pMemoize(request, {
+export default mem(request, {
 	maxAge: 600000
 })
