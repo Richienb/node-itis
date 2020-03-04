@@ -1,10 +1,26 @@
 {
   "name": "itis",
-  "version": "1.0.0",
-  "main": "dist/index.js",
-  "repository": "https://github.com/Richienb/itis.git",
+  "version": "0.0.0",
+  "description": "An wrapper for the Integrated Taxonomic Information System.",
+  "repository": "https://github.com/Richienb/the-module.git",
   "author": "Richie Bendall <richiebendall@gmail.com>",
   "license": "MIT",
+  "main": "dist/index.js",
+  "files": [
+    "src/**/*",
+    "dist/**/*"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "docs": "typedoc",
+    "build": "tsc && yarn docs",
+    "dev": "yarn tsc --watch",
+    "lint": "xo",
+    "test": "yarn lint && ava"
+  },
+  "keywords": [],
   "dependencies": {
     "@sindresorhus/is": "^2.1.0",
     "ky": "^0.17.0",
@@ -16,6 +32,25 @@
   "devDependencies": {
     "@types/node": "^13.7.6",
     "@types/omit-empty": "^1.0.0",
-    "typescript": "^3.8.3"
+    "ava": "^3.5.0",
+    "eslint-config-richienb": "^0.3.0",
+    "ts-node": "^8.6.2",
+    "typedoc": "^0.16.11",
+    "typescript": "^3.8.3",
+    "xo": "^0.26.1"
+  },
+  "resolutions": {
+    "eslint": "^6.8.0"
+  },
+  "xo": {
+    "extends": "richienb/ts"
+  },
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
   }
 }
