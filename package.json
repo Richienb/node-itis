@@ -14,7 +14,7 @@
     "ow": "^0.15.1"
   },
   "devDependencies": {
-    "@types/node": "^13.7.6",
+    "@types/node": "^13.7.7",
     "@types/omit-empty": "^1.0.0",
     "typescript": "^3.8.3"
   }
