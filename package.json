@@ -30,7 +30,7 @@
     "ow": "^0.15.1"
   },
   "devDependencies": {
-    "@types/node": "^13.9.3",
+    "@types/node": "^13.9.5",
     "@types/omit-empty": "^1.0.0",
     "ava": "^3.5.1",
     "eslint-config-richienb": "^0.3.0",
